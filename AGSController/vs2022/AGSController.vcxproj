@@ -105,11 +105,13 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\AGSController_script_header.gen.cpp" />
     <ClCompile Include="..\controller.cpp" />
     <ClCompile Include="..\ControllerModule.cpp" />
     <ClCompile Include="..\JoystickControllerModule.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\AGSController_script_header.h" />
     <ClInclude Include="..\controller.h" />
     <ClInclude Include="..\ControllerModule.h" />
     <ClInclude Include="..\JoystickControllerModule.h" />

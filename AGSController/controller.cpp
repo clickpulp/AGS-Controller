@@ -24,6 +24,7 @@
 
 #include "plugin/agsplugin.h"
 #include "ControllerModule.h"
+#include "AGSController_script_header.h"
 #include "JoystickControllerModule.h"
 
 #if defined(BUILTIN_PLUGINS)
@@ -154,68 +155,6 @@ LPCSTR AGS_GetPluginName(void)
   return "AGSController";
 }
 
-const char* scriptHeader =
-"/// Does a single mouse click. \r\n"
-"import void ClickMouse(int button);\r\n"
-"\r\n"
-"/// Returns the number of gamecontrollers found\r\n"
-"import int ControllerCount (); \r\n"
-"\r\n"
-"enum ControllerPOV {\r\n"
-"  ePOVCenter = 0,\r\n"
-"  ePOVUp = 1,\r\n"
-"  ePOVRight = 2,\r\n"
-"  ePOVUpRight = 3,\r\n"
-"  ePOVDown = 4,\r\n"
-"  ePOVDownRight = 6,\r\n"
-"  ePOVLeft = 8,\r\n"
-"  ePOVUpLeft = 9,\r\n"
-"  ePOVDownLeft = 12\r\n"
-"};\r\n"
-"#define AXIS_RANGE 32768\r\n"
-"\r\n"
-"managed struct Controller {\r\n"
-"readonly int ID;\r\n"
-"readonly int ButtonCount;\r\n"
-"readonly int AxesCount;\r\n"
-"readonly ControllerPOV POV;\r\n"
-"\r\n"
-"/// Opens specified controller. (0-15)\r\n"
-"import static Controller* Open (int ID); // $AUTOCOMPLETESTATICONLY$\r\n"
-"\r\n"
-"/// Closes controller\r\n"
-"import void Close ();\r\n"
-"\r\n"
-"/// Returns if the controller is currently plugged or not (true / false) \r\n"
-"import bool Plugged ();\r\n"
-"\r\n"
-"/// Returns the controller name\r\n"
-"import String GetName ();\r\n"
-"\r\n"
-"/// Returns axis value bynumber. (0-5)\r\n"
-"import int GetAxis (int axis);\r\n"
-"\r\n"
-"/// Returns POV value. (0-8)\r\n"
-"import int GetPOV();\r\n"
-"\r\n"
-"/// Rumbles the Controller for Duration (in loops). Left and right are motors. Values go from 0 to 65535\r\n"
-"import void Rumble(int left,int right,int duration);\r\n"
-"\r\n"
-"/// Returns true when the specified button is currently down. (0-31)\r\n"
-"import bool IsButtonDown (int button);\r\n"
-"\r\n"
-"/// Returns the first button the player hits on the controller, otherwise returns -1. (0-31)\r\n"
-"import int PressAnyKey();\r\n"
-"\r\n"
-"/// Returns the status of the controller battery. (-1 - 5) UNKNOWN = -1, LESS THAN 5% = 0, LESS THAN 20% = 1, LESS THAN 70% = 2, 100% = 3, WIRED = 4, MAX = 5 \r\n"
-"import int BatteryStatus();\r\n"
-"\r\n"
-"/// Returns true when the specified button is currently down (single press). (0-31)\r\n"
-"import bool IsButtonDownOnce(int button);\r\n"
-"\r\n"
-"};\r\n"
-  ;
-
 int  AGS_EditorStartup(IAGSEditor* lpEditor)
 {
   // User has checked the plugin to use it in their game
@@ -225,7 +164,7 @@ int  AGS_EditorStartup(IAGSEditor* lpEditor)
     return -1;
 
   editor = lpEditor;
-  editor->RegisterScriptHeader(scriptHeader);
+  editor->RegisterScriptHeader(g_scriptHeader);
 
   // Return 0 to indicate success
   return 0;
@@ -234,7 +173,7 @@ int  AGS_EditorStartup(IAGSEditor* lpEditor)
 void AGS_EditorShutdown()
 {
   // User has un-checked the plugin from their game
-  editor->UnregisterScriptHeader(scriptHeader);
+  editor->UnregisterScriptHeader(g_scriptHeader);
 }
 
 void AGS_EditorProperties(HWND parent)
