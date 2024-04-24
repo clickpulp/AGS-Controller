@@ -30,13 +30,13 @@ enum ControllerButton {
     /// Xbox Elite paddle P4 (lower right, facing the back)
     eControllerButtonPaddle4,
     /// PS4/PS5 touchpad button
-    eControllerButtonPaddleTouchpad,
+    eControllerButtonTouchpad,
     eControllerButtonMax
 };
 
 /// Axes available from a game controller
 enum ControllerAxis {
-    eControllerAxisInvalid = -1;
+    eControllerAxisInvalid = -1,
     eControllerAxisLeftX,
     eControllerAxisLeftY,
     eControllerAxisRightX,
@@ -58,8 +58,18 @@ enum ControllerPOV {
   ePOVDownLeft = 12
 };
 
+enum ControllerBatteryStatus {
+    eControllerBatteryStatusUnknown = -1,
+    eControllerBatteryStatusVeryLow,
+    eControllerBatteryStatusLow,
+    eControllerBatteryStatusMedium,
+    eControllerBatteryStatusFull,
+    eControllerBatteryStatusWired,
+    eControllerBatteryStatusMax
+};
+
 /// Does a single mouse click. 
-import void ClickMouse(int button);
+import void ClickMouse(MouseButton button);
 
 /// Returns the number of gamecontrollers found
 import int ControllerCount(); 
@@ -98,7 +108,7 @@ managed struct Controller {
   import ControllerButton PressAnyKey();
 
   /// Returns the status of the controller battery. (-1 - 5) UNKNOWN = -1, LESS THAN 5% = 0, LESS THAN 20% = 1, LESS THAN 70% = 2, 100% = 3, WIRED = 4, MAX = 5 
-  import int BatteryStatus();
+  import ControllerBatteryStatus BatteryStatus();
 
   /// Returns true when the specified button is currently down (single press).
   import bool IsButtonDownOnce(ControllerButton button);
