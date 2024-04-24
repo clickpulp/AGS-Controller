@@ -15,7 +15,6 @@
 #include <SDL.h>
 #include <SDL_joystick.h>
 
-
 #if defined(PSP_VERSION)
 #include <pspsdk.h>
 #include <pspmath.h>
@@ -24,6 +23,8 @@
 #endif
 
 #include "plugin/agsplugin.h"
+#include "ControllerModule.h"
+#include "JoystickControllerModule.h"
 
 #if defined(BUILTIN_PLUGINS)
 namespace agscontroller {
@@ -34,360 +35,45 @@ inline unsigned long _blender_alpha16_bgr(unsigned long y) __attribute__((always
 inline void calc_x_n(unsigned long bla) __attribute__((always_inline));
 #endif
 
+/*
 const unsigned int Magic = 0xACAB0000;
 const unsigned int Version = 1;
 const unsigned int SaveMagic = Magic + Version;
 const float PI = 3.14159265f;
+*/
 
-IAGSEngine* engine;
+#pragma region Controller Module Wrappers
 
-struct Controller
+ControllerModule* g_controllerModule;
+
+
+int Controller_ControllerCount() { return g_controllerModule->ControllerCount(); }
+
+Controller* Controller_Open(int num) { return g_controllerModule->Open(num); }
+
+void Controller_Close(Controller* controller) { g_controllerModule->Close(controller); }
+int Controller_Plugged(Controller* controller) { return g_controllerModule->Plugged(controller); }
+int Controller_GetAxis(Controller* controller, int axis) { return g_controllerModule->GetAxis(controller, axis); }
+int Controller_GetPOV(Controller* controller) { return g_controllerModule->GetPOV(controller); }
+int Controller_IsButtonDown(Controller* controller, int button) { return g_controllerModule->IsButtonDown(controller, button); }
+const char* Controller_GetName(Controller* controller) { return g_controllerModule->GetName(controller); }
+void Controller_Rumble(Controller* controller, int left, int right, int duration) { g_controllerModule->Rumble(controller, left, right, duration); }
+int Controller_IsButtonDownOnce(Controller* controller, int button) { return g_controllerModule->IsButtonDownOnce(controller, button); }
+int Controller_BatteryStatus(Controller* controller) { return g_controllerModule->BatteryStatus(controller); }
+int Controller_PressAnyKey(Controller* controller) { return g_controllerModule->PressAnyKey(controller); }
+void Controller_ClickMouse(int button) { return g_controllerModule->ClickMouse(button); }
+
+
+#pragma endregion // Controller Module Wrappers
+
+#pragma region Engine Stuff
+
+void AGS_EngineStartup(IAGSEngine *engine)
 {
-	int32 id;
-	int32 button_count;
-	int32 axes_count;
-	int32 pov;
-	int buttstate[32];
-	int axes[16];
-	bool isHeld[32];
-};
-
-
-char const* constructname = "controller";
-int32 dummydata = 0;
-
-Controller ControllerInAGS;
-int MaxControllers = 0;
-int ControllerIndex = 0;
-Controller dummyController;
-SDL_Joystick* sdlController;
-SDL_GameController* sdlGameController;
-bool isGamepad=false;
-
-int clamp(int value,int min, int max)
-{
-	if (value <min) value=min;
-	if (value <max) value=max;
-	return value;
-}
-
-class coninterface : public IAGSScriptManagedObject {
-public:
-	// when a ref count reaches 0, this is called with the address
-	// of the object. Return 1 to remove the object from memory, 0 to
-	// leave it
-	virtual int Dispose(const char *address, bool force);
-	// return the type name of the object
-	virtual const char *GetType();
-	// serialize the object into BUFFER (which is BUFSIZE bytes)
-	// return number of bytes used
-	virtual int Serialize(const char *address, char *buffer, int bufsize);
-};
-
-class conreader : public IAGSManagedObjectReader {
-public:
-	virtual void Unserialize(int key, const char *serializedData, int dataSize);
-};
-
-int coninterface::Dispose(const char *address, bool force)
-{
-	// delete ((Joystick*) address);
-	return 0; //1;
-}
-
-const char* coninterface::GetType()
-{
-	return constructname;
-}
-coninterface conintf;
-conreader conread;
-
-int coninterface::Serialize(const char *address, char *buffer, int bufsize)
-{
-	// put 1 byte there
-	memcpy(buffer, &dummydata, sizeof(dummydata));
-	return sizeof(dummydata);
-}
-
-
-
-void conreader::Unserialize(int key, const char *serializedData, int dataSize)
-{
-	engine->RegisterUnserializedObject(key, &ControllerInAGS, &conintf);
-}
-
-
-
-int ControllerCount()
-{
-	return SDL_NumJoysticks();
-}
-
-Controller* Controller_Open(int num)
-{
-	Controller* con;
-	int ax;
-	int b;
-
-	if (num == -1)
-	{
-		con = &dummyController;
-	}
-	else
-	{
-		sdlController = SDL_JoystickOpen(num);
-		
-		if (SDL_IsGameController(num))
-		{
-			sdlGameController=SDL_GameControllerOpen(num);
-			isGamepad=true;
-		}
-		
-
-		ControllerInAGS.button_count = SDL_JoystickNumButtons(sdlController);
-		ControllerInAGS.axes_count = SDL_JoystickNumAxes(sdlController);		
-
-		for (ax = 0; ax<16; ax = ax + 1)
-		{
-			ControllerInAGS.axes[ax] = 0;
-		}
-
-		for (b = 0; b<32; b = b + 1)
-		{
-			ControllerInAGS.buttstate[b] = SDL_RELEASED;
-		}
-
-		int AMAXINT = 0;//131072;
-
-		ControllerInAGS.id = num;
-		ControllerInAGS.pov = AMAXINT;
-
-		con = &ControllerInAGS;
-	}
-	engine->RegisterManagedObject(con, &conintf);
-
-
-	return con;
-}
-
-void Controller_Close(Controller* con)
-{
-	SDL_JoystickClose(sdlController);
-}
-
-int Controller_Plugged(Controller* con)
-{
-	SDL_JoystickUpdate();
-	if (!sdlController)
-	{
-		return 0;
-	}
-	else 
-	{
-		return SDL_JoystickGetAttached(sdlController);
-	}
-}
-
-int Controller_GetAxis(Controller* con, int axis)
-{
-	if (axis>con->axes_count || axis<0 || !sdlController) { return 0; }
-	SDL_JoystickUpdate();
-	ControllerInAGS.axes[axis]=SDL_JoystickGetAxis(sdlController,axis);
-	return ControllerInAGS.axes[axis];
-}
-
-
-int Controller_GetPOV(Controller* con)
-{
-	if (!sdlController)
-	{
-		return -1;
-	}
-	SDL_JoystickUpdate();
-	int setHat=SDL_JoystickGetHat(sdlController,0);
-
-	if (setHat == SDL_HAT_CENTERED)	ControllerInAGS.pov = 0;
-	else if (setHat == SDL_HAT_DOWN) ControllerInAGS.pov = 2 ^ 6;
-	else if (setHat == SDL_HAT_LEFT) ControllerInAGS.pov = 2 ^ 10;
-	else if (setHat == SDL_HAT_RIGHT) ControllerInAGS.pov = 2 ^ 0;
-	else if (setHat == SDL_HAT_UP) ControllerInAGS.pov = 2 ^ 3;
-	else if (setHat == SDL_HAT_LEFTDOWN)ControllerInAGS.pov = 2 ^ 14;
-	else if (setHat == SDL_HAT_RIGHTDOWN)ControllerInAGS.pov = 2 ^ 4;
-	else if (setHat == SDL_HAT_LEFTUP)ControllerInAGS.pov = 2 ^ 11;
-	else if (setHat == SDL_HAT_RIGHTUP)ControllerInAGS.pov = 2 ^ 1;
 	
-	return ControllerInAGS.pov;
-}
+	g_controllerModule = new JoystickControllerModule(engine);
 
-int Controller_IsButtonDown(Controller* con, int butt)
-{
-	if (butt>32 || butt<0 || !sdlController) 
-	{
-		return 0;
-	}
-	SDL_JoystickUpdate();
-	if (butt < ControllerInAGS.button_count)
-	{
-		ControllerInAGS.buttstate[butt]=SDL_JoystickGetButton(sdlController,butt);
-		
-	}
-
-	return ControllerInAGS.buttstate[butt];
-}
-
-
-int Controller_PressAnyKey(Controller*con)
-{
-	//SDL_JoystickUpdate();
-	int butt=0;
-	while (butt < 32)//ControllerInAGS.button_count)
-	{
-		int getButtonState=Controller_IsButtonDown(con,butt);//SDL_JoystickGetButton(sdlController,butt);
-		if (getButtonState==1)
-		{
-			ControllerInAGS.buttstate[butt]=getButtonState;
-			return butt;
-		}
-		butt++;
-	}
-	return -1;
-}
-
-
-int Controller_BatteryStatus(Controller* con)
-{
-	if (!sdlController) 
-	{
-		return 0;
-	}
-	SDL_JoystickUpdate();
-	return SDL_JoystickCurrentPowerLevel(sdlController);
-}
-
-
-
-int Controller_IsButtonDownOnce(Controller* con, int butt)
-{
-	if (butt>32 || butt<0 || !sdlController) 
-	{
-		return 0;
-	}
-	SDL_JoystickUpdate();
-	if (ControllerInAGS.isHeld[butt])
-	{
-	}
-	else 
-	{
-		if (butt < ControllerInAGS.button_count)
-		{
-			ControllerInAGS.buttstate[butt]=SDL_JoystickGetButton(sdlController,butt);
-		}
-		if (ControllerInAGS.buttstate[butt]) ControllerInAGS.isHeld[butt]=true;
-		//else ControllerInAGS.isHeld[butt]=false;
-		
-		return ControllerInAGS.buttstate[butt];
-	}
-	
-}
-
-
-
-void Controller_Rumble(Controller* con,int left,int right,int duration)//duration is in LOOPS
-{
-	if (sdlController)
-	{
-		duration = (duration/40)*1000;
-		int maxFq=65535;
-		SDL_JoystickRumble(sdlController,clamp(left,0,maxFq), clamp(right,0,maxFq), duration);
-	}
-}
-
-
-
-
-const char* Controller_GetName(Controller* con)
-{
-	if (!Controller_Plugged(con)) {
-		return engine->CreateScriptString("disconnected");
-	}
-	else if (SDL_JoystickName(sdlController) != NULL) {
-		return engine->CreateScriptString(SDL_JoystickName(sdlController));
-	}
-	else {
-		return engine->CreateScriptString("");
-	}
-}
-
-void ClickMouse(int button)
-{
-	engine->SimulateMouseClick(button);
-}
-
-///
-
-void Controller_Update()
-{
-	if (sdlController)
-	{
-		int n=0;
-		while (n < 32)
-		{
-			if (!Controller_IsButtonDown(&ControllerInAGS,n)
-				&& ControllerInAGS.isHeld[n])
-			{
-				ControllerInAGS.isHeld[n]=false;
-			}
-			n++;
-		}
-	}
-	if (sdlGameController!=NULL)
-	{
-	int up  = SDL_GameControllerGetButton(sdlGameController, SDL_CONTROLLER_BUTTON_DPAD_UP);
-	int down= SDL_GameControllerGetButton(sdlGameController, SDL_CONTROLLER_BUTTON_DPAD_DOWN);
-    int left= SDL_GameControllerGetButton(sdlGameController, SDL_CONTROLLER_BUTTON_DPAD_LEFT);
-    int right = SDL_GameControllerGetButton(sdlGameController, SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
-
-	if (up==1)
-	{
-		if (left==1) ControllerInAGS.pov = 2 ^ 11;
-		else if (right==1) ControllerInAGS.pov = 2 ^ 1;
-		else ControllerInAGS.pov = 2 ^ 3;
-	}
-	else if (down==1)
-	{
-		if (left==1) ControllerInAGS.pov = 2 ^ 14;
-		else if (right==1) ControllerInAGS.pov = 2 ^ 4;
-		else ControllerInAGS.pov = 2 ^ 6;
-	}
-	else 
-	{
-		if (left==1) ControllerInAGS.pov = 2 ^ 10;
-		else if (right==1) ControllerInAGS.pov = 2 ^ 0;
-		else ControllerInAGS.pov = 0;
-	}
-
-    bool LeftTrigger= !(SDL_GameControllerGetAxis(sdlGameController, SDL_CONTROLLER_AXIS_TRIGGERLEFT)< (abs(32768)-1000));
-	bool RightTrigger= !(SDL_GameControllerGetAxis(sdlGameController, SDL_CONTROLLER_AXIS_TRIGGERRIGHT)< (abs(32768)-1000));
-
-	int getButtons=ControllerInAGS.button_count-1;
-
-	ControllerInAGS.buttstate[getButtons+1]=LeftTrigger;
-	ControllerInAGS.buttstate[getButtons+2]=RightTrigger;
-
-	}
-}
-
-//------------------------------------------------------------
-// Engine stuff
-//------------------------------------------------------------
-
-void AGS_EngineStartup(IAGSEngine *lpEngine)
-{
-  
-
-	engine = lpEngine;
-
-	engine->RegisterScriptFunction("ControllerCount", (void*)&ControllerCount);
+	engine->RegisterScriptFunction("ControllerCount", (void*)&Controller_ControllerCount);
 	engine->RegisterScriptFunction("Controller::Open", (void*)&Controller_Open);
 	engine->RegisterScriptFunction("Controller::Plugged", (void*)&Controller_Plugged);
 	engine->RegisterScriptFunction("Controller::GetAxis", (void*)&Controller_GetAxis);
@@ -399,23 +85,16 @@ void AGS_EngineStartup(IAGSEngine *lpEngine)
 	engine->RegisterScriptFunction("Controller::IsButtonDownOnce",(void*)&Controller_IsButtonDownOnce);
 	engine->RegisterScriptFunction("Controller::PressAnyKey",(void*)&Controller_PressAnyKey);
     engine->RegisterScriptFunction("Controller::BatteryStatus",(void*)&Controller_BatteryStatus);
-	engine->RegisterScriptFunction("ClickMouse",(void*)&ClickMouse);
-
+	engine->RegisterScriptFunction("ClickMouse",(void*)&Controller_ClickMouse);
 	
-	
- 	
-	engine->AddManagedObjectReader(constructname, &conread);
-
-	//SDL_Init(SDL_INIT_JOYSTICK);
-	SDL_InitSubSystem(SDL_INIT_JOYSTICK);
 	engine->RequestEventHook(AGSE_PREGUIDRAW);
-}
 
+	SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
+}
 
 void AGS_EngineInitGfx(const char *driverID, void *data)
 {
 }
-
 
 void AGS_EngineShutdown()
 {
@@ -426,7 +105,7 @@ int AGS_EngineOnEvent(int event, int data)
 {
   if (event == AGSE_PREGUIDRAW)
   {
-	 Controller_Update();
+	  if (g_controllerModule != nullptr) g_controllerModule->Update();
   }  
   else if (event == AGSE_RESTOREGAME)
   {
@@ -456,6 +135,7 @@ int AGS_EngineDebugHook(const char *scriptName, int lineNum, int reserved)
   return 0;
 }
 
+#pragma endregion Editor Stuff
 
 
 #if defined(WINDOWS_VERSION) && !defined(BUILTIN_PLUGINS)
