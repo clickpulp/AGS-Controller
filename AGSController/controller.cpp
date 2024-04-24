@@ -11,9 +11,7 @@
 #define THIS_IS_THE_PLUGIN
 #endif
 
-#include <stdio.h>
 #include <SDL.h>
-#include <SDL_joystick.h>
 
 #if defined(PSP_VERSION)
 #include <pspsdk.h>
@@ -23,7 +21,6 @@
 #endif
 
 #include "plugin/agsplugin.h"
-#include "ControllerModule.h"
 #include "AGSController_script_header.h"
 #include "JoystickControllerModule.h"
 
@@ -43,15 +40,12 @@ const unsigned int SaveMagic = Magic + Version;
 const float PI = 3.14159265f;
 */
 
-#pragma region Controller Module Wrappers
-
 ControllerModule* g_controllerModule;
 
+#pragma region Controller Module Wrappers
 
 int Controller_ControllerCount() { return g_controllerModule->ControllerCount(); }
-
 Controller* Controller_Open(int num) { return g_controllerModule->Open(num); }
-
 void Controller_Close(Controller* controller) { g_controllerModule->Close(controller); }
 int Controller_Plugged(Controller* controller) { return g_controllerModule->Plugged(controller); }
 int Controller_GetAxis(Controller* controller, int axis) { return g_controllerModule->GetAxis(controller, axis); }
@@ -64,30 +58,28 @@ int Controller_BatteryStatus(Controller* controller) { return g_controllerModule
 int Controller_PressAnyKey(Controller* controller) { return g_controllerModule->PressAnyKey(controller); }
 void Controller_ClickMouse(int button) { return g_controllerModule->ClickMouse(button); }
 
-
 #pragma endregion // Controller Module Wrappers
 
 #pragma region Engine Stuff
 
-void AGS_EngineStartup(IAGSEngine *engine)
+void AGS_EngineStartup(IAGSEngine* engine)
 {
-	
 	g_controllerModule = new JoystickControllerModule(engine);
 
 	engine->RegisterScriptFunction("ControllerCount", (void*)&Controller_ControllerCount);
 	engine->RegisterScriptFunction("Controller::Open", (void*)&Controller_Open);
 	engine->RegisterScriptFunction("Controller::Plugged", (void*)&Controller_Plugged);
 	engine->RegisterScriptFunction("Controller::GetAxis", (void*)&Controller_GetAxis);
-	engine->RegisterScriptFunction("Controller::GetPOV",(void*)&Controller_GetPOV);
+	engine->RegisterScriptFunction("Controller::GetPOV", (void*)&Controller_GetPOV);
 	engine->RegisterScriptFunction("Controller::IsButtonDown", (void*)&Controller_IsButtonDown);
 	engine->RegisterScriptFunction("Controller::Close", (void*)&Controller_Close);
-	engine->RegisterScriptFunction("Controller::GetName^0", reinterpret_cast<void *>(Controller_GetName));
+	engine->RegisterScriptFunction("Controller::GetName^0", reinterpret_cast<void*>(Controller_GetName));
 	engine->RegisterScriptFunction("Controller::Rumble", (void*)&Controller_Rumble);
-	engine->RegisterScriptFunction("Controller::IsButtonDownOnce",(void*)&Controller_IsButtonDownOnce);
-	engine->RegisterScriptFunction("Controller::PressAnyKey",(void*)&Controller_PressAnyKey);
-    engine->RegisterScriptFunction("Controller::BatteryStatus",(void*)&Controller_BatteryStatus);
-	engine->RegisterScriptFunction("ClickMouse",(void*)&Controller_ClickMouse);
-	
+	engine->RegisterScriptFunction("Controller::IsButtonDownOnce", (void*)&Controller_IsButtonDownOnce);
+	engine->RegisterScriptFunction("Controller::PressAnyKey", (void*)&Controller_PressAnyKey);
+	engine->RegisterScriptFunction("Controller::BatteryStatus", (void*)&Controller_BatteryStatus);
+	engine->RegisterScriptFunction("ClickMouse", (void*)&Controller_ClickMouse);
+
 	engine->RequestEventHook(AGSE_PREGUIDRAW);
 
 	SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
@@ -136,7 +128,9 @@ int AGS_EngineDebugHook(const char *scriptName, int lineNum, int reserved)
   return 0;
 }
 
-#pragma endregion Editor Stuff
+#pragma endregion
+
+#pragma region // Editor Stuff
 
 
 #if defined(WINDOWS_VERSION) && !defined(BUILTIN_PLUGINS)
@@ -196,6 +190,7 @@ void AGS_EditorLoadGame(char* buffer, int bufsize)
 
 #endif
 
+#pragma endregion
 
 #if defined(BUILTIN_PLUGINS)
 } // namespace agscontroller
