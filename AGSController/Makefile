@@ -7,6 +7,8 @@ CXX = g++
 LIBS = -lm -lstdc++
 
 ifeq ($(UNAME), Darwin)
+	CC = clang
+	CXX = clang++
 	LIBS    += -framework SDL2
 	SDL_LIB = -F/Library/Frameworks
 	SDL_INCLUDE = -F/Library/Frameworks -I/Library/Frameworks/SDL2.framework/Headers/
