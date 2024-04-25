@@ -2631,7 +2631,7 @@
                 <Text>Battery</Text>
                 <TextAlignment>Center</TextAlignment>
                 <TextColor>15</TextColor>
-                <Top>37</Top>
+                <Top>48</Top>
                 <Translated>True</Translated>
                 <Visible>True</Visible>
                 <Width>188</Width>
@@ -2641,12 +2641,12 @@
                 <Clickable>True</Clickable>
                 <Enabled>True</Enabled>
                 <Font>0</Font>
-                <Height>13</Height>
+                <Height>25</Height>
                 <ID>20</ID>
                 <Left>66</Left>
                 <Locked>False</Locked>
                 <Name>lblControllerName</Name>
-                <Text>ControllerName</Text>
+                <Text xml:space="preserve">ControllerName[Line 2</Text>
                 <TextAlignment>Center</TextAlignment>
                 <TextColor>15</TextColor>
                 <Top>17</Top>
