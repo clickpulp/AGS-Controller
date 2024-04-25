@@ -108,14 +108,17 @@
     <ClCompile Include="..\AGSController_script_header.gen.cpp" />
     <ClCompile Include="..\controller.cpp" />
     <ClCompile Include="..\ControllerModule.cpp" />
+    <ClCompile Include="..\GameControllerModule.cpp" />
     <ClCompile Include="..\JoystickControllerModule.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\AGSController_script_header.h" />
     <ClInclude Include="..\controller.h" />
     <ClInclude Include="..\ControllerModule.h" />
+    <ClInclude Include="..\GameControllerModule.h" />
     <ClInclude Include="..\JoystickControllerModule.h" />
     <ClInclude Include="..\plugin\agsplugin.h" />
+    <ClInclude Include="..\plugin\agsplugin_evts.h" />
     <ClInclude Include="..\stdint.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

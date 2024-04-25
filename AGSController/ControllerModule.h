@@ -5,6 +5,8 @@
 
 #include "plugin/agsplugin.h"
 
+int clamp(int value, int min, int max);
+
 struct Controller
 {
 	int32 id;
@@ -14,6 +16,30 @@ struct Controller
 	int buttstate[32];
 	int axes[16];
 	bool isHeld[32];
+};
+
+
+class ControllerScriptManagedObject : public IAGSScriptManagedObject {
+public:
+	// when a ref count reaches 0, this is called with the address
+	// of the object. Return 1 to remove the object from memory, 0 to
+	// leave it
+	virtual int Dispose(void* address, bool force);
+	// return the type name of the object
+	virtual const char* GetType();
+	// serialize the object into BUFFER (which is BUFSIZE bytes)
+	// return number of bytes used
+	virtual int Serialize(void* address, char* buffer, int bufsize);
+};
+
+
+class ControllerManagedObjectReader : public IAGSManagedObjectReader {
+	IAGSEngine* m_engine;
+	Controller* m_controller;
+	IAGSScriptManagedObject* m_scriptManagedObject;
+public:
+	ControllerManagedObjectReader(IAGSEngine* engine, Controller* controller, IAGSScriptManagedObject* scriptManagedObject);
+	virtual void Unserialize(int key, const char* serializedData, int dataSize);
 };
 
 

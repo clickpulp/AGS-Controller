@@ -22,7 +22,7 @@
 
 #include "plugin/agsplugin.h"
 #include "AGSController_script_header.h"
-#include "JoystickControllerModule.h"
+#include "GameControllerModule.h"
 
 #if defined(BUILTIN_PLUGINS)
 namespace agscontroller {
@@ -64,7 +64,7 @@ void Controller_ClickMouse(int button) { return g_controllerModule->ClickMouse(b
 
 void AGS_EngineStartup(IAGSEngine* engine)
 {
-	g_controllerModule = new JoystickControllerModule(engine);
+	g_controllerModule = new GameControllerModule(engine);
 
 	engine->RegisterScriptFunction("ControllerCount", (void*)&Controller_ControllerCount);
 	engine->RegisterScriptFunction("Controller::Open", (void*)&Controller_Open);

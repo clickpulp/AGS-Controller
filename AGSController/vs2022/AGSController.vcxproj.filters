@@ -16,6 +16,15 @@
     <ClInclude Include="..\JoystickControllerModule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\GameControllerModule.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AGSController_script_header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\plugin\agsplugin_evts.h">
+      <Filter>Header Files\plugin</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -39,6 +48,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\ControllerModule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GameControllerModule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AGSController_script_header.gen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

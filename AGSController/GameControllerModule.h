@@ -1,9 +1,10 @@
-#ifndef JOYSTICKCONTROLLERMODULE_H
-#define JOYSTICKCONTROLLERMODULE_H
+#ifndef GAMECONTROLLERMODULE_H
+#define GAMECONTROLLERMODULE_H
 
 #include "ControllerModule.h"
 
-class JoystickControllerModule : public ControllerModule
+
+class GameControllerModule : public ControllerModule
 {
 	Controller m_controllerInAGS;
 	SDL_Joystick* m_sdlJoystick;
@@ -13,7 +14,7 @@ class JoystickControllerModule : public ControllerModule
 	bool m_isGamepad = false;
 
 public:
-	JoystickControllerModule(IAGSEngine* engine);
+	GameControllerModule(IAGSEngine* engine);
 
 	void Update() override;
 	int ControllerCount() override;
