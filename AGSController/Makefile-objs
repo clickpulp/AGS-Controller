@@ -1,1 +1,6 @@
-OBJS = controller.o
+OBJS = \
+  controller.o \
+  ControllerModule.o \
+  GameControllerModule.o \
+  JoystickControllerModule.o \
+  AGSController_script_header.gen.o

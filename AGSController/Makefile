@@ -1,7 +1,5 @@
 UNAME := $(shell uname)
 
-
-
 INCDIR = ../../Engine ../../Common
 LIBDIR =
 CC = gcc
@@ -9,35 +7,31 @@ CXX = g++
 LIBS = -lm -lstdc++
 
 ifeq ($(UNAME), Darwin)
+	LIBS    += -framework SDL2
+	SDL_LIB = -F/Library/Frameworks
+	SDL_INCLUDE = -F/Library/Frameworks -I/Library/Frameworks/SDL2.framework/Headers/
 
-LIBS    += -framework SDL2
-SDL_LIB = -F/Library/Frameworks
-SDL_INCLUDE = -F/Library/Frameworks -I/Library/Frameworks/SDL2.framework/Headers/
-
-CFLAGS = -fPIC -fvisibility=hidden -O2 -g -Wall $(SDL_INCLUDE)
-LDFLAGS = $(SDL_LIB)
-TARGET = libagscontroller.dylib
-CFLAGS += -DMAC_VERSION
+	CFLAGS = -fPIC -fvisibility=hidden -O2 -g -Wall $(SDL_INCLUDE)
+	LDFLAGS = $(SDL_LIB)
+	TARGET = libagscontroller.dylib
+	CFLAGS += -DMAC_VERSION
 else
+	SDL_LIB = `sdl2-config --libs`
+	SDL_INCLUDE = `sdl2-config --cflags`
 
-SDL_LIB = `sdl2-config --libs`
-SDL_INCLUDE = `sdl2-config --cflags`
-
-CFLAGS = -fPIC -fvisibility=hidden -O2 -g -Wall $(SDL_INCLUDE)
-LDFLAGS = $(SDL_LIB)
-TARGET = libagscontroller.so
-CFLAGS += -DLINUX_VERSION
+	CFLAGS = -fPIC -fvisibility=hidden -O2 -g -Wall $(SDL_INCLUDE)
+	LDFLAGS = $(SDL_LIB)
+	TARGET = libagscontroller.so
+	CFLAGS += -DLINUX_VERSION
 endif
 
-CXXFLAGS = $(CFLAGS)
+CXXFLAGS = $(CFLAGS) -std=c++11
 
 include Makefile-objs
-
 
 CFLAGS   := $(addprefix -I,$(INCDIR)) $(CFLAGS)
 CXXFLAGS := $(CFLAGS) $(CXXFLAGS)
 ASFLAGS  := $(CFLAGS) $(ASFLAGS)
-
 
 .PHONY: clean
 
