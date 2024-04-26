@@ -22,40 +22,47 @@ int GameControllerModule::ControllerCount()
 
 void GameControllerModule::Update()
 {
-	if (m_sdlGameController != NULL)
+	if (m_sdlGameController == NULL) return;
+
+	for (short int i = 0; i < 32; i++)
 	{
-		int up = SDL_GameControllerGetButton(m_sdlGameController, SDL_CONTROLLER_BUTTON_DPAD_UP);
-		int down = SDL_GameControllerGetButton(m_sdlGameController, SDL_CONTROLLER_BUTTON_DPAD_DOWN);
-		int left = SDL_GameControllerGetButton(m_sdlGameController, SDL_CONTROLLER_BUTTON_DPAD_LEFT);
-		int right = SDL_GameControllerGetButton(m_sdlGameController, SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
-
-		if (up == 1)
+		if (!IsButtonDown(&m_controllerInAGS, i) && m_controllerInAGS.isHeld[i])
 		{
-			if (left == 1) m_controllerInAGS.pov = 0x2 ^ 11;
-			else if (right == 1) m_controllerInAGS.pov = 0x2 ^ 1;
-			else m_controllerInAGS.pov = 0x2 ^ 3;
+			m_controllerInAGS.isHeld[i] = false;
 		}
-		else if (down == 1)
-		{
-			if (left == 1) m_controllerInAGS.pov = 0x2 ^ 14;
-			else if (right == 1) m_controllerInAGS.pov = 0x2 ^ 4;
-			else m_controllerInAGS.pov = 0x2 ^ 6;
-		}
-		else
-		{
-			if (left == 1) m_controllerInAGS.pov = 0x2 ^ 10;
-			else if (right == 1) m_controllerInAGS.pov = 0x2 ^ 0;
-			else m_controllerInAGS.pov = 0;
-		}
-
-		bool LeftTrigger = !(SDL_GameControllerGetAxis(m_sdlGameController, SDL_CONTROLLER_AXIS_TRIGGERLEFT) < (abs(32768) - 1000));
-		bool RightTrigger = !(SDL_GameControllerGetAxis(m_sdlGameController, SDL_CONTROLLER_AXIS_TRIGGERRIGHT) < (abs(32768) - 1000));
-
-		int getButtons = m_controllerInAGS.button_count - 1;
-
-		m_controllerInAGS.buttstate[getButtons + 1] = LeftTrigger;
-		m_controllerInAGS.buttstate[getButtons + 2] = RightTrigger;
 	}
+
+	int up = SDL_GameControllerGetButton(m_sdlGameController, SDL_CONTROLLER_BUTTON_DPAD_UP);
+	int down = SDL_GameControllerGetButton(m_sdlGameController, SDL_CONTROLLER_BUTTON_DPAD_DOWN);
+	int left = SDL_GameControllerGetButton(m_sdlGameController, SDL_CONTROLLER_BUTTON_DPAD_LEFT);
+	int right = SDL_GameControllerGetButton(m_sdlGameController, SDL_CONTROLLER_BUTTON_DPAD_RIGHT);
+
+	if (up == 1)
+	{
+		if (left == 1) m_controllerInAGS.pov = 0x2 ^ 11;
+		else if (right == 1) m_controllerInAGS.pov = 0x2 ^ 1;
+		else m_controllerInAGS.pov = 0x2 ^ 3;
+	}
+	else if (down == 1)
+	{
+		if (left == 1) m_controllerInAGS.pov = 0x2 ^ 14;
+		else if (right == 1) m_controllerInAGS.pov = 0x2 ^ 4;
+		else m_controllerInAGS.pov = 0x2 ^ 6;
+	}
+	else
+	{
+		if (left == 1) m_controllerInAGS.pov = 0x2 ^ 10;
+		else if (right == 1) m_controllerInAGS.pov = 0x2 ^ 0;
+		else m_controllerInAGS.pov = 0;
+	}
+
+	bool LeftTrigger = !(SDL_GameControllerGetAxis(m_sdlGameController, SDL_CONTROLLER_AXIS_TRIGGERLEFT) < (abs(32768) - 1000));
+	bool RightTrigger = !(SDL_GameControllerGetAxis(m_sdlGameController, SDL_CONTROLLER_AXIS_TRIGGERRIGHT) < (abs(32768) - 1000));
+
+	int getButtons = m_controllerInAGS.button_count - 1;
+
+	m_controllerInAGS.buttstate[getButtons + 1] = LeftTrigger;
+	m_controllerInAGS.buttstate[getButtons + 2] = RightTrigger;
 }
 
 Controller* GameControllerModule::Open(int num)
@@ -222,8 +229,11 @@ int GameControllerModule::IsButtonDownOnce(Controller* controller, int button)
 		{
 			m_controllerInAGS.buttstate[button] = SDL_GameControllerGetButton(m_sdlGameController, static_cast<SDL_GameControllerButton>(button));
 		}
-		if (m_controllerInAGS.buttstate[button]) m_controllerInAGS.isHeld[button] = true;
-		//else ControllerInAGS.isHeld[butt]=false;
+
+		if (m_controllerInAGS.buttstate[button])
+		{
+			m_controllerInAGS.isHeld[button] = true;
+		}
 
 		return m_controllerInAGS.buttstate[button];
 	}
