@@ -62,6 +62,8 @@ void Controller_ClickMouse(int button) { return g_controllerModule->ClickMouse(b
 
 #pragma region Engine Stuff
 
+int AGS_PluginV2() { return 1; }
+
 void AGS_EngineStartup(IAGSEngine* engine)
 {
 	g_controllerModule = new GameControllerModule(engine);
