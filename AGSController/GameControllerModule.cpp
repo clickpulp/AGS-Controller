@@ -39,20 +39,20 @@ void GameControllerModule::Update()
 
 	if (up == 1)
 	{
-		if (left == 1) m_controllerInAGS.pov = 0x2 ^ 11;
-		else if (right == 1) m_controllerInAGS.pov = 0x2 ^ 1;
-		else m_controllerInAGS.pov = 0x2 ^ 3;
+		if (left == 1) m_controllerInAGS.pov = 2 ^ 11;
+		else if (right == 1) m_controllerInAGS.pov = 2 ^ 1;
+		else m_controllerInAGS.pov = 2 ^ 3;
 	}
 	else if (down == 1)
 	{
-		if (left == 1) m_controllerInAGS.pov = 0x2 ^ 14;
-		else if (right == 1) m_controllerInAGS.pov = 0x2 ^ 4;
-		else m_controllerInAGS.pov = 0x2 ^ 6;
+		if (left == 1) m_controllerInAGS.pov = 2 ^ 14;
+		else if (right == 1) m_controllerInAGS.pov = 2 ^ 4;
+		else m_controllerInAGS.pov = 2 ^ 6;
 	}
 	else
 	{
-		if (left == 1) m_controllerInAGS.pov = 0x2 ^ 10;
-		else if (right == 1) m_controllerInAGS.pov = 0x2 ^ 0;
+		if (left == 1) m_controllerInAGS.pov = 2 ^ 10;
+		else if (right == 1) m_controllerInAGS.pov = 2 ^ 0;
 		else m_controllerInAGS.pov = 0;
 	}
 
@@ -78,6 +78,8 @@ Controller* GameControllerModule::Open(int num)
 	else
 	{
 		m_sdlJoystick = SDL_JoystickOpen(num);
+		
+		m_supportsHat = SDL_JoystickNumHats(m_sdlJoystick) > 0;
 
 		if (SDL_IsGameController(num))
 		{
@@ -117,7 +119,8 @@ void GameControllerModule::Close(Controller* controller)
 	{
 		SDL_GameControllerClose(m_sdlGameController);
 	}
-	if (m_sdlJoystick) {
+	if (m_sdlJoystick)
+	{
 		SDL_JoystickClose(m_sdlJoystick);
 	}
 }
@@ -151,18 +154,22 @@ int GameControllerModule::GetPOV(Controller* controller)
 		return -1;
 	}
 
-	SDL_JoystickUpdate();
-	int setHat = SDL_JoystickGetHat(m_sdlJoystick, 0);
+	if (m_supportsHat)
+	{
+		// Read POV values if the Controller hat is supported. Else rely on dpad update from Update call.
+		SDL_JoystickUpdate();
+		auto hat = SDL_JoystickGetHat(m_sdlJoystick, 0);
 
-	if (setHat == SDL_HAT_CENTERED)	m_controllerInAGS.pov = 0;
-	else if (setHat == SDL_HAT_DOWN) m_controllerInAGS.pov = 0x2 ^ 6;
-	else if (setHat == SDL_HAT_LEFT) m_controllerInAGS.pov = 0x2 ^ 10;
-	else if (setHat == SDL_HAT_RIGHT) m_controllerInAGS.pov = 0x2 ^ 0;
-	else if (setHat == SDL_HAT_UP) m_controllerInAGS.pov = 0x2 ^ 3;
-	else if (setHat == SDL_HAT_LEFTDOWN)m_controllerInAGS.pov = 0x2 ^ 14;
-	else if (setHat == SDL_HAT_RIGHTDOWN)m_controllerInAGS.pov = 0x2 ^ 4;
-	else if (setHat == SDL_HAT_LEFTUP)m_controllerInAGS.pov = 0x2 ^ 11;
-	else if (setHat == SDL_HAT_RIGHTUP)m_controllerInAGS.pov = 0x2 ^ 1;
+		if (hat == SDL_HAT_CENTERED)	m_controllerInAGS.pov = 0;
+		else if (hat == SDL_HAT_DOWN) m_controllerInAGS.pov = 2 ^ 6;
+		else if (hat == SDL_HAT_LEFT) m_controllerInAGS.pov = 2 ^ 10;
+		else if (hat == SDL_HAT_RIGHT) m_controllerInAGS.pov = 2 ^ 0;
+		else if (hat == SDL_HAT_UP) m_controllerInAGS.pov = 2 ^ 3;
+		else if (hat == SDL_HAT_LEFTDOWN)m_controllerInAGS.pov = 2 ^ 14;
+		else if (hat == SDL_HAT_RIGHTDOWN)m_controllerInAGS.pov = 2 ^ 4;
+		else if (hat == SDL_HAT_LEFTUP)m_controllerInAGS.pov = 2 ^ 11;
+		else if (hat == SDL_HAT_RIGHTUP)m_controllerInAGS.pov = 2 ^ 1;
+	}
 
 	return m_controllerInAGS.pov;
 }

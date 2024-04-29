@@ -12,6 +12,7 @@ class GameControllerModule : public ControllerModule
 	ControllerManagedObjectReader* m_managedObjectReader;
 	ControllerScriptManagedObject* m_scriptManagedObject;
 	bool m_isGamepad = false;
+	bool m_supportsHat = false;
 
 public:
 	GameControllerModule(IAGSEngine* engine);
