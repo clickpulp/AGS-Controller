@@ -1,5 +1,5 @@
-#define CONTROLLER_AXIS_RANGE_MIN 32767
-#define CONTROLLER_AXIS_RANGE_MAX -32768
+#define CONTROLLER_AXIS_RANGE_MIN -32767
+#define CONTROLLER_AXIS_RANGE_MAX 32768
 
 /// Buttons available from a game controller
 enum ControllerButton {

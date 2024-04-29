@@ -3,8 +3,8 @@
 /////////////////
 
 const char* g_scriptHeader =
-    "#define CONTROLLER_AXIS_RANGE_MIN 32767\r\n"
-    "#define CONTROLLER_AXIS_RANGE_MAX -32768\r\n"
+    "#define CONTROLLER_AXIS_RANGE_MIN -32767\r\n"
+    "#define CONTROLLER_AXIS_RANGE_MAX 32768\r\n"
     "\r\n"
     "/// Buttons available from a game controller\r\n"
     "enum ControllerButton {\r\n"
