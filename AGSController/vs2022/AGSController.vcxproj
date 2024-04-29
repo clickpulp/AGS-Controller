@@ -121,6 +121,9 @@
     <ClInclude Include="..\plugin\agsplugin_evts.h" />
     <ClInclude Include="..\stdint.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\AGSController_script_header.ash" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

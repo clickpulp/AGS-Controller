@@ -39,6 +39,9 @@
       <Extensions>
       </Extensions>
     </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{15841e6b-81b3-45bb-882c-cfed6adc5f96}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\controller.cpp">
@@ -56,5 +59,10 @@
     <ClCompile Include="..\AGSController_script_header.gen.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\AGSController_script_header.ash">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
