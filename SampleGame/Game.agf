@@ -2655,6 +2655,24 @@
                 <Width>191</Width>
                 <ZOrder>20</ZOrder>
               </GUILabel>
+              <GUILabel>
+                <Clickable>True</Clickable>
+                <Enabled>True</Enabled>
+                <Font>0</Font>
+                <Height>13</Height>
+                <ID>21</ID>
+                <Left>110</Left>
+                <Locked>False</Locked>
+                <Name>lblControllerPOV</Name>
+                <Text>POV</Text>
+                <TextAlignment>Center</TextAlignment>
+                <TextColor>15</TextColor>
+                <Top>120</Top>
+                <Translated>True</Translated>
+                <Visible>True</Visible>
+                <Width>101</Width>
+                <ZOrder>21</ZOrder>
+              </GUILabel>
             </Controls>
           </GUIMain>
         </GUIs>
