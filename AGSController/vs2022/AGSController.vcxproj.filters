@@ -25,6 +25,9 @@
     <ClInclude Include="..\plugin\agsplugin_evts.h">
       <Filter>Header Files\plugin</Filter>
     </ClInclude>
+    <ClInclude Include="..\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -64,5 +67,10 @@
     <None Include="..\AGSController_script_header.ash">
       <Filter>Resource Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\AGSController.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

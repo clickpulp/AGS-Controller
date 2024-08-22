@@ -84,7 +84,7 @@ void AGS_EngineStartup(IAGSEngine* engine)
 
 	engine->RequestEventHook(AGSE_PREGUIDRAW);
 
-	SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
+	//SDL_GameControllerAddMappingsFromFile("gamecontrollerdb.txt");
 }
 
 void AGS_EngineInitGfx(const char *driverID, void *data)
@@ -148,7 +148,7 @@ IAGSEditor* editor;
 LPCSTR AGS_GetPluginName(void)
 {
   // Return the plugin description
-  return "AGSController";
+  return "AGSControllerPulp";
 }
 
 int  AGS_EditorStartup(IAGSEditor* lpEditor)
@@ -176,7 +176,7 @@ void AGS_EditorProperties(HWND parent)
 {
   // User has chosen to view the Properties of the plugin
   // We could load up an options dialog or something here instead
-  MessageBoxA(parent, "AGSController", "About", MB_OK | MB_ICONINFORMATION);
+  MessageBoxA(parent, "AGS Controller Plugin (Clickpulp Alternative)", "About", MB_OK | MB_ICONINFORMATION);
 }
 
 int AGS_EditorSaveGame(char* buffer, int bufsize)
