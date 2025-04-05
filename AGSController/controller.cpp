@@ -93,7 +93,11 @@ void AGS_EngineInitGfx(const char *driverID, void *data)
 
 void AGS_EngineShutdown()
 {
-	SDL_Quit();
+	if (g_controllerModule != nullptr)
+	{
+		delete g_controllerModule;
+		g_controllerModule = nullptr;
+	}
 }
 
 int AGS_EngineOnEvent(int event, int data)

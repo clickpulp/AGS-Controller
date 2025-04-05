@@ -16,6 +16,7 @@ class GameControllerModule : public ControllerModule
 
 public:
 	GameControllerModule(IAGSEngine* engine);
+	~GameControllerModule();
 
 	void Update() override;
 	int ControllerCount() override;

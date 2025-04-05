@@ -14,6 +14,7 @@ class JoystickControllerModule : public ControllerModule
 
 public:
 	JoystickControllerModule(IAGSEngine* engine);
+	~JoystickControllerModule();
 
 	void Update() override;
 	int ControllerCount() override;

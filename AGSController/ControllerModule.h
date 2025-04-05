@@ -49,6 +49,7 @@ protected:
 	IAGSEngine* m_engine;
 public:
 	ControllerModule(IAGSEngine* engine);
+	virtual ~ControllerModule() = default;
 	virtual int ControllerCount() = 0;
 	virtual Controller* Open(int num) = 0;
 	virtual void Close(Controller* controller) = 0;

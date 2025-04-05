@@ -15,6 +15,11 @@ GameControllerModule::GameControllerModule(IAGSEngine* engine)
 	engine->AddManagedObjectReader(m_scriptManagedObject->GetType(), m_managedObjectReader);
 }
 
+GameControllerModule::~GameControllerModule()
+{
+	SDL_QuitSubSystem(SDL_INIT_GAMECONTROLLER);
+}
+
 int GameControllerModule::ControllerCount()
 {
 	return SDL_NumJoysticks();
@@ -24,6 +29,7 @@ void GameControllerModule::Update()
 {
 	if (m_sdlGameController == NULL) return;
 
+	// Update button states
 	for (short int i = 0; i < 32; i++)
 	{
 		if (!IsButtonDown(&m_controllerInAGS, i) && m_controllerInAGS.isHeld[i])
@@ -32,6 +38,7 @@ void GameControllerModule::Update()
 		}
 	}
 
+	// D-Pad input
 	int up = SDL_GameControllerGetButton(m_sdlGameController, SDL_CONTROLLER_BUTTON_DPAD_UP);
 	int down = SDL_GameControllerGetButton(m_sdlGameController, SDL_CONTROLLER_BUTTON_DPAD_DOWN);
 	int left = SDL_GameControllerGetButton(m_sdlGameController, SDL_CONTROLLER_BUTTON_DPAD_LEFT);
@@ -56,6 +63,7 @@ void GameControllerModule::Update()
 		else m_controllerInAGS.pov = 0;
 	}
 
+	// Trigger input
 	bool LeftTrigger = !(SDL_GameControllerGetAxis(m_sdlGameController, SDL_CONTROLLER_AXIS_TRIGGERLEFT) < (abs(32768) - 1000));
 	bool RightTrigger = !(SDL_GameControllerGetAxis(m_sdlGameController, SDL_CONTROLLER_AXIS_TRIGGERRIGHT) < (abs(32768) - 1000));
 
@@ -71,45 +79,57 @@ Controller* GameControllerModule::Open(int num)
 	int ax;
 	int b;
 
+	// If no controller is specified, use a dummy controller
 	if (num == -1)
 	{
 		con = &dummyController2;
 	}
 	else
 	{
-		m_sdlJoystick = SDL_JoystickOpen(num);
-		
-		m_supportsHat = SDL_JoystickNumHats(m_sdlJoystick) > 0;
-
+		// If it's a game controller, open it as a game controller
 		if (SDL_IsGameController(num))
 		{
 			m_sdlGameController = SDL_GameControllerOpen(num);
+			m_sdlJoystick = nullptr;  // Ensure joystick is not opened
 			m_isGamepad = true;
+			m_supportsHat = false;
 		}
-
-		m_controllerInAGS.button_count = SDL_JoystickNumButtons(m_sdlJoystick);
-		m_controllerInAGS.axes_count = SDL_JoystickNumAxes(m_sdlJoystick);
-
-		for (ax = 0; ax < 16; ax = ax + 1)
+		else
 		{
-			m_controllerInAGS.axes[ax] = 0;
+			// If it's not a game controller, open it as a joystick
+			m_sdlJoystick = SDL_JoystickOpen(num);
+			m_sdlGameController = nullptr;  // Ensure game controller is not opened
+			m_isGamepad = false;
+			m_supportsHat = SDL_JoystickNumHats(m_sdlJoystick) > 0;
 		}
 
-		for (b = 0; b < 32; b = b + 1)
+		// Initialize controller's button and axis count
+		if (m_sdlGameController)
 		{
-			m_controllerInAGS.buttstate[b] = SDL_RELEASED;
+			// Game controller uses predefined count for buttons and axes
+			m_controllerInAGS.button_count = 18; // Most game controllers have 16 buttons
+			m_controllerInAGS.axes_count = 6;    // Most game controllers have 6 axes
+		}
+		else if (m_sdlJoystick)
+		{
+			// For joystick, use SDL's API to determine the button and axis count
+			m_controllerInAGS.button_count = SDL_JoystickNumButtons(m_sdlJoystick);
+			m_controllerInAGS.axes_count = SDL_JoystickNumAxes(m_sdlJoystick);
 		}
 
-		int AMAXINT = 0;//131072;
+		// Initialize controller state
+		for (ax = 0; ax < 16; ax++) m_controllerInAGS.axes[ax] = 0;
+		for (b = 0; b < 32; b++) m_controllerInAGS.buttstate[b] = SDL_RELEASED;
 
+		int AMAXINT = 0;
 		m_controllerInAGS.id = num;
 		m_controllerInAGS.pov = AMAXINT;
 
 		con = &m_controllerInAGS;
 	}
+
+	// Register the controller for scripting
 	m_engine->RegisterManagedObject(con, m_scriptManagedObject);
-
-
 	return con;
 }
 
@@ -209,10 +229,10 @@ const char* GameControllerModule::GetName(Controller* controller)
 
 void GameControllerModule::Rumble(Controller* controller, int left, int right, int duration)
 {
-	if (m_sdlJoystick)
+	if (m_sdlGameController)
 	{
-		duration = (duration / 40) * 1000; // TODO: Depends on the game speed
-		int maxFq = 65535; // TODO: Should be const or definition
+		duration = (duration / 40) * 1000; // Adjust based on game speed
+		int maxFq = 65535; // Max frequency for rumble
 		SDL_GameControllerRumble(m_sdlGameController, clamp(left, 0, maxFq), clamp(right, 0, maxFq), duration);
 	}
 }
@@ -263,9 +283,9 @@ int GameControllerModule::PressAnyKey(Controller* controller)
 {
 	//SDL_JoystickUpdate();
 	int button = 0;
-	while (button < 32)//ControllerInAGS.button_count)
+	while (button < 32)
 	{
-		int getButtonState = IsButtonDown(controller, button);//SDL_JoystickGetButton(sdlController,butt);
+		int getButtonState = IsButtonDown(controller, button);
 		if (getButtonState == 1)
 		{
 			m_controllerInAGS.buttstate[button] = getButtonState;
