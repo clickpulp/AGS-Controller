@@ -27,7 +27,7 @@ int GameControllerModule::ControllerCount()
 
 void GameControllerModule::Update()
 {
-	if (m_sdlGameController == NULL) return;
+	if (m_sdlGameController == nullptr) return;
 
 	// Update button states
 	for (short int i = 0; i < 32; i++)
@@ -169,7 +169,7 @@ int GameControllerModule::GetAxis(Controller* controller, int axis)
 
 int GameControllerModule::GetPOV(Controller* controller)
 {
-	if (!m_sdlJoystick)
+	if (!m_sdlGameController && !m_sdlJoystick)
 	{
 		return -1;
 	}
